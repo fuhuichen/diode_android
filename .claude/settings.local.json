@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb shell:*)",
+      "Bash(adb forward:*)",
+      "Bash(curl:*)",
+      "Bash(adb logcat:*)",
+      "Bash(./scripts/build_app.sh:*)",
+      "Bash(chmod:*)",
+      "Bash(ssh:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(adb install:*)",
+      "Bash(adb uninstall:*)",
+      "WebFetch(domain:www.ubet88.io)",
+      "WebSearch",
+      "Bash(sips:*)",
+      "Bash(./gradlew assembleRelease:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.ap_
+*.aab
+
+# Gradle
+.gradle/
+build/
+
+# Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+captures/
+output.json
+
+# NDK
+obj/
+.externalNativeBuild/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go Mobile
+app/libs/*.aar
+app/libs/*.jar
+!app/libs/.gitkeep
+
+# Release signing (勿提交密碼與 keystore)
+app/keystore.properties
+app/*.keystore
+
+# SSH/TLS keys
+*.pem
