@@ -72,19 +72,19 @@ class WebViewActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext, "代理 127.0.0.1:$port 已設定", Toast.LENGTH_SHORT).show()
                     // 延遲 200ms 再載入，確保代理完全生效
                     binding.webView.postDelayed(
-                        { binding.webView.loadUrl("https://www.ubet88.io") },
+                        { binding.webView.loadUrl(BuildConfig.DEFAULT_URL) },
                         200
                     )
                 } },
                 { runOnUiThread {
                     android.util.Log.e(TAG, "Diode WebView proxy override failed")
                     Toast.makeText(applicationContext, "代理設定失敗", Toast.LENGTH_SHORT).show()
-                    binding.webView.loadUrl("https://www.ubet88.io")
+                    binding.webView.loadUrl(BuildConfig.DEFAULT_URL)
                 } }
             )
         } else {
             Toast.makeText(applicationContext, "此裝置不支援 WebView 代理設定", Toast.LENGTH_LONG).show()
-            binding.webView.loadUrl("https://www.ubet88.io")
+            binding.webView.loadUrl(BuildConfig.DEFAULT_URL)
         }
 
         // Cookie 持久化
@@ -106,6 +106,7 @@ class WebViewActivity : AppCompatActivity() {
     private fun setupUrlBarIfPresent() {
         val etUrl = binding.root.findViewById<android.widget.EditText>(R.id.etUrl) ?: return
         val btnGo = binding.root.findViewById<android.view.View>(R.id.btnGo) ?: return
+        etUrl.setText(BuildConfig.DEFAULT_URL)
         etUrl.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
                 loadUrl()
@@ -144,7 +145,7 @@ class WebViewActivity : AppCompatActivity() {
 
     private inner class DiodeWebChromeClient : WebChromeClient() {
         override fun onReceivedTitle(view: WebView?, title: String?) {
-            supportActionBar?.title = title ?: "UB"
+            supportActionBar?.title = title ?: getString(R.string.app_name)
         }
     }
 

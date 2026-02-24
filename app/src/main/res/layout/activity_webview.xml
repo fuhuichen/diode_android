@@ -25,7 +25,6 @@
                 android:id="@+id/etUrl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="https://www.ubet88.io"
                 android:inputType="textUri"
                 android:imeOptions="actionGo"
                 android:maxLines="1" />

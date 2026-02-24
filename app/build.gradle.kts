@@ -53,6 +53,27 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+    }
+
+    flavorDimensions += "brand"
+    productFlavors {
+        create("ub") {
+            dimension = "brand"
+            applicationId = "com.diode.ub"
+            buildConfigField("String", "DEFAULT_URL", "\"https://www.ubet88.io\"")
+            buildConfigField("String", "API_KEY", "\"dk_bdb31264eb6942abb34be02ba933a857\"")
+            buildConfigField("String", "API_SECRET", "\"ds_6bd6fae49c42416394f14fbd3baa86623fda6ae9df984a35\"")
+            resValue("string", "app_name", "UB")
+        }
+        create("k7") {
+            dimension = "brand"
+            applicationId = "com.diode.k7"
+            buildConfigField("String", "DEFAULT_URL", "\"https://m1.zc83641fun.shop\"")
+            buildConfigField("String", "API_KEY", "\"dk_2b86022520194ee6aadb20c89554e793\"")
+            buildConfigField("String", "API_SECRET", "\"ds_98419284f0144e98a065d85617e4cfd38c6841037e794fce\"")
+            resValue("string", "app_name", "K7")
+        }
     }
 }
 
