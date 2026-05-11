@@ -144,17 +144,14 @@ class DiodeApiClient {
             conn = url.openConnection() as HttpURLConnection
             val bodyStr = body.toString()
             val timestamp = (System.currentTimeMillis() / 1000).toString()
-            val apkSig = apkSignature()
-            val signature = Mobile.signRequest(API_KEY, "POST", path, timestamp, bodyStr, apkSig)
+            // 新版 AAR (upstream master) 的 signRequest 是 5 參數，後端走 v2 HMAC 模式（不含 apkSig）
+            val signature = Mobile.signRequest(API_KEY, "POST", path, timestamp, bodyStr)
 
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json")
             conn.setRequestProperty("X-API-Key", API_KEY)
             conn.setRequestProperty("X-Timestamp", timestamp)
             conn.setRequestProperty("X-Signature", signature)
-            if (apkSig.isNotEmpty()) {
-                conn.setRequestProperty("X-App-Signature", apkSig)
-            }
             conn.connectTimeout = CONNECT_TIMEOUT
             conn.readTimeout = READ_TIMEOUT
             conn.doOutput = true
