@@ -44,3 +44,7 @@ app/*.keystore
 
 # SSH/TLS keys
 *.pem
+
+# iOS artifacts (本 repo 為 Android，iOS 編譯產物不在此追蹤)
+openssl-ios/
+scripts/build_openssl_ios.sh

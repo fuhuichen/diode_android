@@ -1,12 +1,16 @@
 package com.diode.android
 
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import mobile.Mobile
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 import java.util.UUID
 
 data class NodeInfo(
@@ -15,7 +19,6 @@ data class NodeInfo(
     val clientAddress: String,
     val activeConnections: Int
 ) {
-    /** 地區顯示名稱 */
     val regionDisplayName: String
         get() = REGION_NAMES[region] ?: region
 
@@ -31,22 +34,57 @@ data class NodeInfo(
     }
 }
 
+data class KeepaliveResult(val ok: Boolean, val warning: Boolean)
+
 /**
  * HTTP client for Diode backend API.
- * Uses java.net.HttpURLConnection to avoid extra dependencies.
+ * Authentication uses HMAC-SHA256 (computed in native Go code; secret never exposed in Java/Kotlin).
  */
 class DiodeApiClient {
 
     companion object {
         private const val TAG = "DiodeApi"
-        private const val BASE_URL = "http://13.213.186.48/diode"
+        private const val BASE_URL = "https://diode.sofa-partner.com/diode"
         private val API_KEY = BuildConfig.API_KEY
-        private val API_SECRET = BuildConfig.API_SECRET
         private const val CONNECT_TIMEOUT = 10_000
         private const val READ_TIMEOUT = 15_000
+
+        /** 自身 APK 簽章證書 SHA-256（lowercase hex）— 後端 v1 模式驗證必填 */
+        @Volatile private var apkSignatureHex: String? = null
+
+        private fun computeApkSignatureHex(): String {
+            return try {
+                val ctx = DiodeApplication.appContext
+                val pm = ctx.packageManager
+                val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val info = pm.getPackageInfo(ctx.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+                    val si = info.signingInfo
+                    when {
+                        si == null -> emptyArray()
+                        si.hasMultipleSigners() -> si.apkContentsSigners
+                        else -> si.signingCertificateHistory
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    pm.getPackageInfo(ctx.packageName, PackageManager.GET_SIGNATURES).signatures ?: emptyArray()
+                }
+                if (signatures.isEmpty()) return ""
+                val md = MessageDigest.getInstance("SHA-256")
+                md.digest(signatures[0].toByteArray()).joinToString("") { "%02x".format(it) }
+            } catch (e: Exception) {
+                Log.e(TAG, "computeApkSignatureHex failed", e)
+                ""
+            }
+        }
+
+        fun apkSignature(): String {
+            apkSignatureHex?.let { return it }
+            val hex = computeApkSignatureHex()
+            apkSignatureHex = hex
+            return hex
+        }
     }
 
-    /** POST /api/v1/nodes — 取得可用節點列表（已按 active_connections 升序排序） */
     fun getNodes(): List<NodeInfo> {
         val body = JSONObject()
         val response = post("/api/v1/nodes", body) ?: return emptyList()
@@ -66,55 +104,63 @@ class DiodeApiClient {
         return result
     }
 
-    /** POST /api/v1/connect — 註冊連線 */
     fun connect(nodeId: String, sessionId: String): Boolean {
         val body = JSONObject().apply {
             put("node_id", nodeId)
             put("session_id", sessionId)
         }
-        val response = post("/api/v1/connect", body)
-        return response != null
+        return post("/api/v1/connect", body) != null
     }
 
-    /** POST /api/v1/keepalive */
-    fun keepalive(sessionId: String): Boolean {
+    fun keepalive(sessionId: String, bytesUp: Long = 0, bytesDown: Long = 0): KeepaliveResult {
         val body = JSONObject().apply {
             put("session_id", sessionId)
+            put("bytes_up", bytesUp)
+            put("bytes_down", bytesDown)
         }
         val response = post("/api/v1/keepalive", body)
-        return response != null
+            ?: return KeepaliveResult(ok = false, warning = false)
+        val warning = response.optBoolean("warning", false)
+        return KeepaliveResult(ok = true, warning = warning)
     }
 
-    /** POST /api/v1/disconnect */
     fun disconnect(sessionId: String): Boolean {
         val body = JSONObject().apply {
             put("session_id", sessionId)
         }
-        val response = post("/api/v1/disconnect", body)
-        return response != null
+        return post("/api/v1/disconnect", body) != null
     }
 
-    /** 產生唯一 session ID */
+    fun sendClientLog(payload: JSONObject): Boolean {
+        return post("/api/v1/clientlog", payload) != null
+    }
+
     fun generateSessionId(): String = UUID.randomUUID().toString().replace("-", "")
 
-    /**
-     * 執行 POST 請求，回傳 JSON response 或 null（失敗時）。
-     */
     private fun post(path: String, body: JSONObject): JSONObject? {
         var conn: HttpURLConnection? = null
         try {
             val url = URL("$BASE_URL$path")
             conn = url.openConnection() as HttpURLConnection
+            val bodyStr = body.toString()
+            val timestamp = (System.currentTimeMillis() / 1000).toString()
+            val apkSig = apkSignature()
+            val signature = Mobile.signRequest(API_KEY, "POST", path, timestamp, bodyStr, apkSig)
+
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json")
             conn.setRequestProperty("X-API-Key", API_KEY)
-            conn.setRequestProperty("X-API-Secret", API_SECRET)
+            conn.setRequestProperty("X-Timestamp", timestamp)
+            conn.setRequestProperty("X-Signature", signature)
+            if (apkSig.isNotEmpty()) {
+                conn.setRequestProperty("X-App-Signature", apkSig)
+            }
             conn.connectTimeout = CONNECT_TIMEOUT
             conn.readTimeout = READ_TIMEOUT
             conn.doOutput = true
 
             OutputStreamWriter(conn.outputStream, Charsets.UTF_8).use { writer ->
-                writer.write(body.toString())
+                writer.write(bodyStr)
                 writer.flush()
             }
 

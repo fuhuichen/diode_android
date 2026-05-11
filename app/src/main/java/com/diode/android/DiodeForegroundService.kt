@@ -22,8 +22,8 @@ class DiodeForegroundService : Service() {
     companion object {
         private const val CHANNEL_ID = "DiodeServiceChannel"
         private const val NOTIFICATION_ID = 101
-        // 本機 Diode SOCKS 監聽此 port，與 Bind 的 8080 分開，讓 Bind 可轉發到遠端
-        private const val DEFAULT_SOCKS_PORT = 9080
+        // 本機 Diode SOCKS 監聽此 port，與 Bind 分開，讓 Bind 可轉發到遠端
+        private val DEFAULT_SOCKS_PORT = BuildConfig.DIODE_SOCKS_PORT
 
         const val EXTRA_RPC_ADDRS = "rpc_addrs"
         const val EXTRA_SOCKS_PORT = "socks_port"
@@ -62,7 +62,8 @@ class DiodeForegroundService : Service() {
 
         Thread {
             try {
-                // 每次重啟前：先清除 binding，再停止 node，確保乾淨狀態
+                // 每次重啟前：先清除 node 連線狀態和 binding，再停止 node，確保乾淨狀態
+                NodeConnectionManager.instance.reset()
                 val clearResult = Mobile.clearBinds()
                 Log.i(TAG, "clearBinds on restart: $clearResult")
                 Mobile.stopDiode()
@@ -81,14 +82,16 @@ class DiodeForegroundService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        Log.i(TAG, "onDestroy clearing binds and stopping Diode")
-        try {
-            Mobile.clearBinds()
-            Mobile.stopDiode()
-            Log.i(TAG, "Diode stopped")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error stopping Diode", e)
-        }
+        Log.i(TAG, "onDestroy: disconnecting node and stopping Diode")
+        Thread {
+            try {
+                NodeConnectionManager.instance.disconnectCurrent()
+                Mobile.stopDiode()
+                Log.i(TAG, "Diode stopped")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error stopping Diode", e)
+            }
+        }.start()
         super.onDestroy()
     }
 

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- JC text -->
+    <group
+        android:translateX="18"
+        android:translateY="18">
+        <!-- J -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M20,16 L28,16 L28,44 Q28,52 20,52 L14,52 L14,44 L18,44 Q20,44 20,42 Z" />
+        <!-- C -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M52,16 L64,16 L64,24 L52,24 Q46,24 46,30 L46,42 Q46,48 52,48 L64,48 L64,56 L52,56 Q36,56 36,42 L36,30 Q36,16 52,16 Z" />
+    </group>
+</vector>

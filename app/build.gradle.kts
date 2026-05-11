@@ -19,8 +19,8 @@ android {
         applicationId = "com.diode.android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     signingConfigs {
@@ -44,6 +44,16 @@ android {
             )
         }
     }
+
+    // APK 檔名加上版號與 build type，例如：diode-ub-v1.1-2-release.apk
+    applicationVariants.all {
+        val variant = this
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl)
+                .outputFileName =
+                    "diode-${variant.flavorName}-v${variant.versionName}-${variant.versionCode}-${variant.buildType.name}.apk"
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -63,7 +73,8 @@ android {
             applicationId = "com.diode.ub"
             buildConfigField("String", "DEFAULT_URL", "\"https://www.ubet88.io\"")
             buildConfigField("String", "API_KEY", "\"dk_bdb31264eb6942abb34be02ba933a857\"")
-            buildConfigField("String", "API_SECRET", "\"ds_6bd6fae49c42416394f14fbd3baa86623fda6ae9df984a35\"")
+            buildConfigField("int", "DIODE_SOCKS_PORT", "9080")
+            buildConfigField("int", "WEBVIEW_PROXY_PORT", "8080")
             resValue("string", "app_name", "UB")
         }
         create("k7") {
@@ -71,8 +82,18 @@ android {
             applicationId = "com.diode.k7"
             buildConfigField("String", "DEFAULT_URL", "\"https://m1.zc83641fun.shop\"")
             buildConfigField("String", "API_KEY", "\"dk_2b86022520194ee6aadb20c89554e793\"")
-            buildConfigField("String", "API_SECRET", "\"ds_98419284f0144e98a065d85617e4cfd38c6841037e794fce\"")
+            buildConfigField("int", "DIODE_SOCKS_PORT", "9081")
+            buildConfigField("int", "WEBVIEW_PROXY_PORT", "8081")
             resValue("string", "app_name", "K7")
+        }
+        create("juicycc") {
+            dimension = "brand"
+            applicationId = "com.diode.juicycc"
+            buildConfigField("String", "DEFAULT_URL", "\"https://juicycc.com/\"")
+            buildConfigField("String", "API_KEY", "\"dk_2a1a656306ef47dc9af9da92d7b9f7d1\"")
+            buildConfigField("int", "DIODE_SOCKS_PORT", "9082")
+            buildConfigField("int", "WEBVIEW_PROXY_PORT", "8082")
+            resValue("string", "app_name", "juicycc")
         }
     }
 }

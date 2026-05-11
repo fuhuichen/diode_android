@@ -15,15 +15,6 @@
         android:scaleType="fitCenter"
         android:visibility="gone" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="UB"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:gravity="center" />
-
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -36,8 +27,46 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="正在連線代理..."
+        android:text="隱私保護中"
         android:textSize="16sp"
         android:textStyle="bold"
         android:gravity="center" />
+
+    <TextView
+        android:id="@+id/tvElapsed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="13sp"
+        android:textColor="#888888"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textSize="13sp"
+        android:textColor="#888888"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnRetry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:minWidth="200dp"
+        android:text="重新連線"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnSendLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:minWidth="200dp"
+        android:text="送出 log 給客服"
+        android:visibility="gone" />
+
 </LinearLayout>

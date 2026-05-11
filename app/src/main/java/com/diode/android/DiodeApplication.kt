@@ -1,6 +1,7 @@
 package com.diode.android
 
 import android.app.Application
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import java.io.File
@@ -14,6 +15,7 @@ class DiodeApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        appContext = applicationContext
         loadOpenSslLibs()
     }
 
@@ -42,5 +44,7 @@ class DiodeApplication : Application() {
 
     companion object {
         private const val TAG = "Diode"
+        lateinit var appContext: Context
+            private set
     }
 }
